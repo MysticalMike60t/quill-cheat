@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Website Response Grabber
+// @name         Quill.org Cheat
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Grab response from a website
-// @author       You
+// @description  Get answers for Quill.org
+// @author       Caden Finkelstein
 // @match        https://www.quill.org/connect/*
 // @grant        none
 // ==/UserScript==
