@@ -28,3 +28,14 @@ https://cms.quill.org/questions/{$questionId}/responses
 ```https
 https://cms.quill.org/questions/{$questionId}/multiple_choice_options
 ```
+
+## Additional info
+### Concepts
+```https
+https://www.quill.org/api/v1/concepts.json
+```
+### Settings
+Looking for {$projectId}, but I dont know where it is. This is the value it was for me: `XVeKI40fXyEqHE1Is9btaglTLTAaMHzQ`.
+```https
+https://cdn.segment.com/v1/projects/{$projectId}/settings
+```
