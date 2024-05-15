@@ -3,10 +3,10 @@
 `>` = Setting a value instead of using it
 {$*} = Inputted value
 ## Step 1
-```bash
+```javascript
 https://www.quill.org/connect/#/play/lesson/{>$id}?activities={00}&student={00}
 ```
-```bash
+```javascript
 https://www.quill.org/api/v1/lessons/{$id}.json
 ```
 - Returns questions
@@ -21,10 +21,10 @@ https://www.quill.org/api/v1/lessons/{$id}.json
 
 ## Step 2
 ### Written Responses
-```bash
+```javascript
 https://cms.quill.org/questions/{$questionId}/responses
 ```
 ### Multiple Choice Responses
-```bash
+```javascript
 https://cms.quill.org/questions/{$questionId}/multiple_choice_options
 ```
