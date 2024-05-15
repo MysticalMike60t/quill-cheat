@@ -8,9 +8,9 @@ https://www.quill.org/connect/#/play/lesson/{$id}?activities={00}&student={00}
 - Example structure: jsonData.questions[0].key
 - Question key is then used for requests for json files regarding the individual question
 
-/* Not Needed: https://www.quill.org/api/v1/questions/{$questionId}.json
+<!-- Not Needed: https://www.quill.org/api/v1/questions/{$questionId}.json
 	Returns question data
-*/
+-->
 
 ## Step 2
 ### Written Responses
