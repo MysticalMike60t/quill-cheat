@@ -1,9 +1,10 @@
 # Structure / Documentation
 ## Key
-`>` = Setting a value instead of using it
-<br/>
-`00` = Value not important
-{$*} = Inputted value
+> `>` = Setting a value instead of using it
+> <br/>
+> `00` = Value not important
+> <br/>
+> `{$*}` = Inputted value
 ## Step 1
 ```https
 https://www.quill.org/connect/#/play/lesson/{>$id}?activities={00}&student={00}
