@@ -7,6 +7,7 @@
  \___\_\\__,_| ||_|_|    \_____|_| |_|\___| \__,__|  \__|
 </pre>
 <hr />
+
 # Structure / Documentation
 ## Key
 > `>` = Setting a value instead of using it
