@@ -59,3 +59,6 @@ https://cdn.segment.com/v1/projects/{$projectId}/settings
 
 ## Bookmarklet
 In development....
+
+# Other Projects
+[Edpuzzle skipper](https://cadenmf.com/api) (adding2210 made it, but I edited it for other use)
