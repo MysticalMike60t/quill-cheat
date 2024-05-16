@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Quill.org Cheat
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Get answers for Quill.org
 // @author       Caden Finkelstein
 // @match        https://www.quill.org/connect/*
@@ -11,68 +11,121 @@
 (function () {
     "use strict";
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const quillButton = document.querySelector(".regen-button");
+    // Function to clear existing content
+    function clearContent() {
+        const contentDiv = document.querySelector(".student-container");
+        if (contentDiv) {
+            contentDiv.innerHTML = ""; // Clear the content
+        } else {
+            console.error("Content container not found.");
+        }
+    }
+
+    // Function to get URL parameters
+    function getUrlParams(url) {
+    const match = url.match(/\/lesson\/([^?#/]+)/);
+    if (match) {
+        const id = match[1];
+        return { id };
+    }
+    return { id: null }; // Return null if ID is not found
+}
+
+    // Function to display questions and answers
+    function displayQuestionsAndAnswers(questions, responses) {
+        const contentDiv = document.querySelector(".student-container");
+        if (contentDiv) {
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.textContent = `Question: ${question.key}`;
+                contentDiv.appendChild(questionDiv);
+
+                const responseDiv = document.createElement("div");
+                responseDiv.textContent = `Response: ${responses[index]}`;
+                contentDiv.appendChild(responseDiv);
+
+                const separator = document.createElement("hr");
+                contentDiv.appendChild(separator);
+            });
+        } else {
+            console.error("Content container not found.");
+        }
+    }
+
+    // Function to fetch responses for questions
+async function fetchResponses(questions) {
+    const responses = [];
+    for (const question of questions) {
+        const questionId = question.key;
+        try {
+            const responseUrl = `https://cms.quill.org/questions/${questionId}/responses`;
+            const response = await fetch(responseUrl);
+            const responseData = await response.json();
+
+            // Check if responseData is an array of objects
+            if (Array.isArray(responseData) && responseData.length > 0 && typeof responseData[0] === 'object') {
+                // Extract relevant information from each object and concatenate into a string
+                const responseText = responseData.map(obj => obj.text).join(', ');
+                responses.push(responseText);
+            } else {
+                console.error(`Invalid response data format for question ${questionId}`);
+                responses.push("Error fetching response");
+            }
+        } catch (error) {
+            console.error(`Error fetching responses for question ${questionId}:`, error);
+            responses.push("Error fetching response");
+        }
+    }
+    return responses;
+}
+
+    // Function to start the script
+    async function start() {
+        clearContent(); // Clear existing content
+        const currentUrl = window.location.href;
+        const { id } = getUrlParams(currentUrl);
+        const jsonUrl = `https://www.quill.org/api/v1/lessons/${id}.json`;
+
+        try {
+            const response = await fetch(jsonUrl);
+            const jsonData = await response.json();
+            const questions = jsonData.questions;
+
+            const responses = await fetchResponses(questions);
+            displayQuestionsAndAnswers(questions, responses);
+        } catch (error) {
+            console.error("Error fetching JSON data:", error);
+        }
+    }
+
+    // Function to initialize the script
+    function initialize() {
+        const quillButton = document.querySelector(".quill-button");
         if (quillButton) {
             quillButton.addEventListener("click", start);
         } else {
-            console.error("Quill button not found.");
+            console.error("Quill button not found, waiting for it to appear.");
+            waitForQuillButton();
         }
-    });
-
-    function getUrlParams(url) {
-      const params = new URLSearchParams(url);
-      const studentId = params.get("student");
-      return { studentId };
     }
 
-    function displayQuestionsAndAnswers(questionSet) {
-      const contentDiv = document.querySelector(".student-container");
-      const question = questionSet.question;
-        const attempts = questionSet.attempts;
-        const questionDiv = document.createElement("div");
-        questionDiv.textContent = `Question: ${question}`;
-        contentDiv.appendChild(questionDiv);
-        const regenButton = document.createElement("button");
-        regenButton.className = "regen-button";
-        contentDiv.appendChild(regenButton);
-        const separator = document.createElement("hr");
-        contentDiv.appendChild(separator);
-    }
-
-    function start() {
-        const currentUrl = window.location.href;
-        const { studentId } = getUrlParams(currentUrl);
-        const jsonUrl = `https://www.quill.org/api/v1/active_activity_sessions/${studentId}.json`;
-
-        fetch(jsonUrl)
-            .then((response) => response.json())
-            .then((jsonData) => {
-            const questionId = jsonData.currentQuestion.question;
-            const apiUrl = `https://cms.quill.org/questions/${questionId}/responses`;
-
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                console.log("Response:", data);
-                data.forEach(answer => {
-                    const contentDiv = document.querySelector(".student-container");
-                    const answerDiv = document.createElement("div");
-                    answerDiv.textContent = `Answer: ${answer.text}`;
-                    contentDiv.appendChild(answerDiv);
-                });
-            })
-                .catch((error) => {
-                console.error("Error fetching data:", error);
+    // Function to wait for the Quill button
+    function waitForQuillButton() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                const quillButton = document.querySelector(".quill-button");
+                if (quillButton) {
+                    observer.disconnect();
+                    quillButton.addEventListener("click", start);
+                    console.log("Quill button found and event listener attached.");
+                }
             });
-
-            const questionSet = jsonData.currentQuestion;
-            displayQuestionsAndAnswers(questionSet);
-        })
-            .catch((error) => {
-            console.error("Error fetching JSON data:", error);
         });
+
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    start();
-  })();
+    // Call the initialize function
+    initialize();
+
+})();
