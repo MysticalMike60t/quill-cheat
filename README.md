@@ -9,6 +9,10 @@
 <hr />
 
 # Structure / Documentation
+## Requirements
+1. Google chrome or FireFox (only tested it on these two)
+2. [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+	- If you cannot get Tampermonkey, use a "Bookmarklet", which is described [here](#bookmarklet)
 ## Key
 > `>` = Setting a value instead of using it
 > <br/>
@@ -52,3 +56,6 @@ Looking for {$projectId}, but I dont know where it is. This is the value it was 
 ```https
 https://cdn.segment.com/v1/projects/{$projectId}/settings
 ```
+
+## Bookmarklet
+In development....
