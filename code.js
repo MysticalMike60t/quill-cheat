@@ -9,131 +9,132 @@
 // ==/UserScript==
 
 (function () {
-  "use strict";
-
-  // Function to clear existing content
-  function clearContent() {
-    const contentDiv = document.querySelector(".student-container");
-    if (contentDiv) {
-      contentDiv.innerHTML = ""; // Clear the content
-    } else {
-      console.error("Content container not found.");
+    "use strict";
+  
+    // Function to clear existing content
+    function clearContent() {
+      const contentDiv = document.querySelector(".student-container");
+      if (contentDiv) {
+        console.log("Content container found.");
+      } else {
+        console.error("Content container not found.");
+      }
     }
-  }
-
-  // Function to get URL parameters
-  function getUrlParams(url) {
-    const match = url.match(/\/lesson\/([^?#/]+)/);
-    if (match) {
-      const id = match[1];
-      return { id };
+  
+    // Function to get URL parameters
+    function getUrlParams(url) {
+      const match = url.match(/\/lesson\/([^?#/]+)/);
+      if (match) {
+        const id = match[1];
+        return { id };
+      }
+      return { id: null }; // Return null if ID is not found
     }
-    return { id: null }; // Return null if ID is not found
-  }
-
-  // Function to display questions and answers
-  function displayQuestionsAndAnswers(questions, responses) {
-    const contentDiv = document.querySelector(".student-container");
-    if (contentDiv) {
-      questions.forEach((question, index) => {
-        const questionDiv = document.createElement("div");
-        questionDiv.textContent = `Question: ${question.key}`;
-        contentDiv.appendChild(questionDiv);
-
-        const responseDiv = document.createElement("div");
-        responseDiv.textContent = `Response: ${responses[index]}`;
-        contentDiv.appendChild(responseDiv);
-
-        const separator = document.createElement("hr");
-        contentDiv.appendChild(separator);
-      });
-    } else {
-      console.error("Content container not found.");
+  
+    // Function to display questions and answers
+    function displayQuestionsAndAnswers(questions, responses) {
+      const contentDiv = document.querySelector(".student-container");
+      if (contentDiv) {
+        questions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.textContent = `Question: ${question.key}`;
+          contentDiv.appendChild(questionDiv);
+  
+          const responseDiv = document.createElement("div");
+          responseDiv.textContent = `Response: ${responses[index]}`;
+          contentDiv.appendChild(responseDiv);
+  
+          const separator = document.createElement("hr");
+          contentDiv.appendChild(separator);
+        });
+      } else {
+        console.error("Content container not found.");
+      }
     }
-  }
-
-  // Function to fetch responses for questions
-  async function fetchResponses(questions) {
-    const responses = [];
-    for (const question of questions) {
-      const questionId = question.key;
-      try {
-        const responseUrl = `https://cms.quill.org/questions/${questionId}/responses`;
-        const response = await fetch(responseUrl);
-        const responseData = await response.json();
-
-        // Check if responseData is an array of objects
-        if (
-          Array.isArray(responseData) &&
-          responseData.length > 0 &&
-          typeof responseData[0] === "object"
-        ) {
-          // Extract relevant information from each object and concatenate into a string
-          const responseText = responseData.map((obj) => obj.text).join(", ");
-          responses.push(responseText);
-        } else {
+  
+    // Function to fetch responses for questions
+    async function fetchResponses(questions) {
+      const responses = [];
+      for (const question of questions) {
+        const questionId = question.key;
+        try {
+          const responseUrl = `https://cms.quill.org/questions/${questionId}/responses`;
+          const response = await fetch(responseUrl);
+          const responseData = await response.json();
+  
+          // Check if responseData is an array of objects
+          if (
+            Array.isArray(responseData) &&
+            responseData.length > 0 &&
+            typeof responseData[0] === "object"
+          ) {
+            // Extract relevant information from each object and concatenate into a string
+            const responseText = responseData.map((obj) => obj.text).join(", ");
+            responses.push(responseText);
+          } else {
+            console.error(
+              `Invalid response data format for question ${questionId}`
+            );
+            responses.push("Error fetching response");
+          }
+        } catch (error) {
           console.error(
-            `Invalid response data format for question ${questionId}`
+            `Error fetching responses for question ${questionId}:`,
+            error
           );
           responses.push("Error fetching response");
         }
+      }
+      return responses;
+    }
+  
+    // Function to start the script
+    async function start() {
+      clearContent(); // Clear existing content
+      const currentUrl = window.location.href;
+      const { id } = getUrlParams(currentUrl);
+      const jsonUrl = `https://www.quill.org/api/v1/lessons/${id}.json`;
+  
+      try {
+        const response = await fetch(jsonUrl);
+        const jsonData = await response.json();
+        const questions = jsonData.questions;
+  
+        const responses = await fetchResponses(questions);
+        displayQuestionsAndAnswers(questions, responses);
       } catch (error) {
-        console.error(
-          `Error fetching responses for question ${questionId}:`,
-          error
-        );
-        responses.push("Error fetching response");
+        console.error("Error fetching JSON data:", error);
       }
     }
-    return responses;
-  }
-
-  // Function to start the script
-  async function start() {
-    clearContent(); // Clear existing content
-    const currentUrl = window.location.href;
-    const { id } = getUrlParams(currentUrl);
-    const jsonUrl = `https://www.quill.org/api/v1/lessons/${id}.json`;
-
-    try {
-      const response = await fetch(jsonUrl);
-      const jsonData = await response.json();
-      const questions = jsonData.questions;
-
-      const responses = await fetchResponses(questions);
-      displayQuestionsAndAnswers(questions, responses);
-    } catch (error) {
-      console.error("Error fetching JSON data:", error);
+  
+    // Function to initialize the script
+    function initialize() {
+      const quillButton = document.querySelector(".quill-button");
+      if (quillButton) {
+        quillButton.addEventListener("click", start);
+      } else {
+        console.error("Quill button not found, waiting for it to appear.");
+        waitForQuillButton();
+      }
     }
-  }
-
-  // Function to initialize the script
-  function initialize() {
-    const quillButton = document.querySelector(".quill-button");
-    if (quillButton) {
-      quillButton.addEventListener("click", start);
-    } else {
-      console.error("Quill button not found, waiting for it to appear.");
-      waitForQuillButton();
-    }
-  }
-
-  // Function to wait for the Quill button
-  function waitForQuillButton() {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        const quillButton = document.querySelector(".quill-button");
-        if (quillButton) {
-          observer.disconnect();
-          quillButton.addEventListener("click", start);
-          console.log("Quill button found and event listener attached.");
-        }
+  
+    // Function to wait for the Quill button
+    function waitForQuillButton() {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          const quillButton = document.querySelector(".quill-button");
+          if (quillButton) {
+            observer.disconnect();
+            quillButton.addEventListener("click", start);
+            console.log("Quill button found and event listener attached.");
+          }
+        });
       });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-
-  // Call the initialize function
-  initialize();
-})();
+  
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  
+    // Call the initialize function
+    initialize();
+  })();
+  
