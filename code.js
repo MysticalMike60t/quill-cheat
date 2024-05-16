@@ -13,8 +13,21 @@
   
     // Function to clear existing content
     function clearContent() {
-      const contentDiv = document.querySelector(".student-container");
+      const contentDiv = document.querySelector(".activity-container");
+      const styles = document.createElement("style");
+      styles.innerText = `
+      .
+      `
+      document.body.appendChild(styles);
       if (contentDiv) {
+        styles.innerText = `
+        .questions {
+        color: red;
+        background: black;
+        z-index: 99;
+        position: absolute;
+        }
+        `
         console.log("Content container found.");
       } else {
         console.error("Content container not found.");
@@ -33,23 +46,26 @@
   
     // Function to display questions and answers
     function displayQuestionsAndAnswers(questions, responses) {
-      const contentDiv = document.querySelector(".student-container");
+      const contentDiv = document.querySelector(".activity-container");
       if (contentDiv) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "questions";
+        contentDiv.appendChild(wrapper);
         questions.forEach((question, index) => {
           const questionDiv = document.createElement("div");
           questionDiv.className = "answer";
           questionDiv.textContent = `Question: ${question.key}`;
-          contentDiv.appendChild(questionDiv);
+          wrapper.appendChild(questionDiv);
   
           const responseDiv = document.createElement("div");
           responseDiv.className = "answer";
           responseDiv.textContent = `Response: ${responses[index]}`;
-          contentDiv.appendChild(responseDiv);
+          wrapper.appendChild(responseDiv);
   
           const separator = document.createElement("br");
           separator.className = "answer";
-          contentDiv.appendChild(separator);
-          contentDiv.appendChild(separator);
+          wrapper.appendChild(separator);
+          wrapper.appendChild(separator);
         });
       } else {
         console.error("Content container not found.");
