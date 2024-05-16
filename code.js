@@ -37,14 +37,18 @@
       if (contentDiv) {
         questions.forEach((question, index) => {
           const questionDiv = document.createElement("div");
+          questionDiv.className = "answer";
           questionDiv.textContent = `Question: ${question.key}`;
           contentDiv.appendChild(questionDiv);
   
           const responseDiv = document.createElement("div");
+          responseDiv.className = "answer";
           responseDiv.textContent = `Response: ${responses[index]}`;
           contentDiv.appendChild(responseDiv);
   
-          const separator = document.createElement("hr");
+          const separator = document.createElement("br");
+          separator.className = "answer";
+          contentDiv.appendChild(separator);
           contentDiv.appendChild(separator);
         });
       } else {
@@ -68,9 +72,11 @@
             responseData.length > 0 &&
             typeof responseData[0] === "object"
           ) {
-            // Extract relevant information from each object and concatenate into a string
-            const responseText = responseData.map((obj) => obj.text).join(", ");
-            responses.push(responseText);
+            // Display each response separately
+            responseData.forEach((obj) => {
+              const responseText = obj.text;
+              responses.push(responseText);
+            });
           } else {
             console.error(
               `Invalid response data format for question ${questionId}`
